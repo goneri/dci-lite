@@ -28,4 +28,5 @@ setuptools.setup(
     description='An alternative client for the distributed-ci.io',
     url='https://github.com/goneri/dci-lite',
     license='Apache v2.0',
+    packages=['dci_lite'],
 )
