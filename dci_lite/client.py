@@ -241,7 +241,7 @@ class DCIResourceCollection:
             raise DCILiteNotFound('Resource not found at %s: %s' % (uri, r.text))
         try:
                 j = r.json()
-        except (json.decoder.JSONDecodeError):
+        except (ValueError):
             raise Exception('Invalid answer from server for %s: %s' % (uri, r.text))
         return j['_meta']['count']
 
@@ -267,7 +267,7 @@ class DCIResourceCollection:
             try:
                 j = r.json()
                 del j['_meta']
-            except (KeyError, json.decoder.JSONDecodeError):
+            except (KeyError, ValueError):
                 raise Exception('Invalid answer from server for %s: %s' % (uri, r.text))
             items = list(j.values())[0]
             if not len(items):
