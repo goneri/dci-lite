@@ -29,4 +29,8 @@ setuptools.setup(
     url='https://github.com/goneri/dci-lite',
     license='Apache v2.0',
     packages=['dci_lite'],
+    install_requires=[
+        'python-dateutil',
+        'dciclient',
+    ],
 )
