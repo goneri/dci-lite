@@ -149,12 +149,6 @@ class DCIResource():
             raise DCILiteDeleteFailure('failed to delete at %s: %s' % (
                 uri, r.text))
 
-    # Component
-    def file_upload(self, file_path):
-        uri = '%s/%s/files' % (self._uri, self.id)
-        with open(file_path, 'rb') as f:
-            return self._transport.post(uri, data=f)
-
 
 class DCIResourceCollection:
     def __init__(self, transport, resource,
@@ -181,6 +175,7 @@ class DCIResourceCollection:
         uri = self._uri
 
         if 'data' in kwargs and hasattr(kwargs['data'], 'read'):
+            # Stream mode
             r = self._transport.post(
                 uri,
                 timeout=dci_base.HTTP_TIMEOUT,
@@ -191,20 +186,25 @@ class DCIResourceCollection:
                 uri,
                 timeout=dci_base.HTTP_TIMEOUT,
                 json=data)
+        new_entry = list(r.json().values())[0]
         if r.status_code != 201:
             raise(Exception('Failed to add %s: %s' % (uri, r.text)))
-        if self._subresource:
-            # return DCIResource(
-            #     self._transport,
-            #     self._resource,
-            #     list(r.json().values())[0],
-            #     parent_resource=self._parent_resource,
-            #     subresource=self._subresource)
+        if not isinstance(new_entry, dict):
+            # probably a new jointure entry, we don't return
+            # anything
+            pass
+        elif self._subresource:
+            return DCIResource(
+                self._transport,
+                self._resource,
+                new_entry,
+                parent_resource=self._parent_resource,
+                subresource=self._subresource)
         else:
             return DCIResource(
                 self._transport,
                 self._resource,
-                list(r.json().values())[0])
+                new_entry,)
 
     def __iter__(self):
         return self.list()

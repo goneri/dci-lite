@@ -54,7 +54,9 @@ def test_schedule():
     my_topic = c.topics.add(name='my_topic')
     my_topic.teams.add(team=team_rocket)
     new_component = c.components.add(name='foo', type='aa', topic=my_topic)
-    new_component.file_upload('/etc/fstab')
+    with open('/etc/fstab') as fd:
+        my_file = new_component.files.add(data=fd)
+    assert my_file.id
 
     c_rci = dci_lite.client.DCIClient.for_remoteci(
         dci_client_id=my_remoteci.id,
