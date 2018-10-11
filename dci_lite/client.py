@@ -1,7 +1,6 @@
 import dateutil.parser
 
 from dciclient.v1.api import context as dci_context
-from dciclient.v1.api import base as dci_base
 
 import os
 import json
@@ -13,6 +12,9 @@ class DCILiteNotFound(Exception):
 
 class DCILiteDeleteFailure(Exception):
     pass
+
+
+HTTP_TIMEOUT = 600
 
 
 def kwargs_to_data(kwargs):
@@ -42,7 +44,7 @@ class DCIResource():
     @classmethod
     def from_id(cls, transport, resource, item_id, **kwargs):
         uri = '%s/%s/%s' % (transport.dci_cs_api, resource, item_id)
-        r = transport.get(uri, timeout=dci_base.HTTP_TIMEOUT, params=kwargs)
+        r = transport.get(uri, timeout=HTTP_TIMEOUT, params=kwargs)
         if r.status_code == 404:
             msg = 'resource not found at %s: %s' % (uri, r.text)
             raise DCILiteNotFound(msg)
@@ -72,7 +74,7 @@ class DCIResource():
             return
 
         uri = self._uri + '/' + self._data['id']
-        r = self._transport.put(uri, timeout=dci_base.HTTP_TIMEOUT,
+        r = self._transport.put(uri, timeout=HTTP_TIMEOUT,
                                 headers={'If-match': self._data['etag']},
                                 json=self._new_data)
         if r.status_code != 200:
@@ -93,7 +95,7 @@ class DCIResource():
         r = self._transport.get(
             uri,
             stream=True,
-            timeout=dci_base.HTTP_TIMEOUT)
+            timeout=HTTP_TIMEOUT)
         r.raise_for_status()
         with open(target + '.part', 'wb') as f:
             for chunk in r.iter_content(chunk_size=1024):
@@ -143,7 +145,7 @@ class DCIResource():
     def delete(self):
         uri = self._uri + '/' + self.id
         r = self._transport.delete(
-            uri, timeout=dci_base.HTTP_TIMEOUT,
+            uri, timeout=HTTP_TIMEOUT,
             headers={'If-match': self._data['etag']})
         if r.status_code != 204:
             raise DCILiteDeleteFailure('failed to delete at %s: %s' % (
@@ -178,13 +180,13 @@ class DCIResourceCollection:
             # Stream mode
             r = self._transport.post(
                 uri,
-                timeout=dci_base.HTTP_TIMEOUT,
+                timeout=HTTP_TIMEOUT,
                 data=kwargs['data'])
         else:
             data = kwargs_to_data(kwargs)
             r = self._transport.post(
                 uri,
-                timeout=dci_base.HTTP_TIMEOUT,
+                timeout=HTTP_TIMEOUT,
                 json=data)
         new_entry = list(r.json().values())[0]
         if r.status_code != 201:
@@ -219,7 +221,7 @@ class DCIResourceCollection:
         uri = self._uri + '/' + item_id
         r = self._transport.get(
             uri,
-            timeout=dci_base.HTTP_TIMEOUT,
+            timeout=HTTP_TIMEOUT,
             params=kwargs)
         if r.status_code == 404:
             msg = 'resource not found at %s: %s' % (uri, r.text)
@@ -237,7 +239,7 @@ class DCIResourceCollection:
         uri = self._uri + '/' + item.id
         r = self._transport.delete(
             uri,
-            timeout=dci_base.HTTP_TIMEOUT,
+            timeout=HTTP_TIMEOUT,
             headers={'If-match': item.etag})
         if r.status_code != 204:
             raise DCILiteDeleteFailure('failed to delete at %s: %s' % (
@@ -262,7 +264,7 @@ class DCIResourceCollection:
 
         r = self._transport.get(
             uri,
-            timeout=dci_base.HTTP_TIMEOUT,
+            timeout=HTTP_TIMEOUT,
             params=data)
         if r.status_code == 404:
             msg = 'Resource not found at %s: %s' % (uri, r.text)
@@ -290,7 +292,7 @@ class DCIResourceCollection:
         while True:
             r = self._transport.get(
                 uri,
-                timeout=dci_base.HTTP_TIMEOUT,
+                timeout=HTTP_TIMEOUT,
                 params=data)
             if r.status_code == 404:
                 msg = 'resource not found at %s: %s' % (uri, r.text)
@@ -310,7 +312,7 @@ class DCIResourceCollection:
 
     def purge(self):
         uri = self._uri + '/purge'
-        r = self._transport.post(uri, timeout=dci_base.HTTP_TIMEOUT)
+        r = self._transport.post(uri, timeout=HTTP_TIMEOUT)
         if r.status_code != 204:
             raise(Exception('Failed to purge resource %s: %s' % (uri, r.text)))
         return r
@@ -320,7 +322,7 @@ class DCIResourceCollection:
         uri = self._uri + '/schedule'
         r = self._transport.post(
             uri,
-            timeout=dci_base.HTTP_TIMEOUT,
+            timeout=HTTP_TIMEOUT,
             data=json.dumps(kwargs_to_data(kwargs)))
         if r.status_code != 201:
             msg = 'Failed to schedule a new job %s: %s' % (uri, r.text)
