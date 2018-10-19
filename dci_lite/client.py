@@ -270,7 +270,7 @@ class DCIResourceCollection:
             msg = 'Resource not found at %s: %s' % (uri, r.text)
             raise DCILiteNotFound(msg)
         try:
-                j = r.json()
+            j = r.json()
         except (ValueError):
             msg = 'Invalid answer from server for %s: %s' % (uri, r.text)
             raise Exception(msg)
@@ -328,7 +328,6 @@ class DCIResourceCollection:
             except ValueError:
                 pass
         return return_func
-
 
 
 class Transport:
