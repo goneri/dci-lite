@@ -1,2 +1,2 @@
 python-dateutil
-git+https://github.com/redhat-cip/python-dciclient
+dciclient
