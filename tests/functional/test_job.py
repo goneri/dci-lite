@@ -17,6 +17,7 @@ def test_create_update_purge_resource():
     assert new_topic.name != my_topic_search_result.name
     my_topic_search_result.refresh()
     assert new_topic.name == my_topic_search_result.name
+    c.topics.purge()
 
 
 def test_create_user_and_team():

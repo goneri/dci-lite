@@ -310,28 +310,25 @@ class DCIResourceCollection:
                 yield DCIResource(self._transport, resource_type, i)
             data['offset'] += data['limit']
 
-    def purge(self):
-        uri = self._uri + '/purge'
-        r = self._transport.post(uri, timeout=HTTP_TIMEOUT)
-        if r.status_code != 204:
-            raise(Exception('Failed to purge resource %s: %s' % (uri, r.text)))
-        return r
+    # generic method to handle the POST call
+    def __getattr__(self, name):
+        def return_func(**kwargs):
+            uri = self._uri + '/' + name
+            r = self._transport.post(
+                uri,
+                timeout=HTTP_TIMEOUT,
+                data=json.dumps(kwargs_to_data(kwargs)))
+            if not r.ok:
+                raise(Exception('Failed to call %s: %s' % (uri, r.text)))
+            try:
+                return DCIResource(
+                    self._transport,
+                    self._resource,
+                    list(r.json().values())[0])
+            except ValueError:
+                pass
+        return return_func
 
-    # Job
-    def schedule(self, **kwargs):
-        uri = self._uri + '/schedule'
-        r = self._transport.post(
-            uri,
-            timeout=HTTP_TIMEOUT,
-            data=json.dumps(kwargs_to_data(kwargs)))
-        if r.status_code != 201:
-            msg = 'Failed to schedule a new job %s: %s' % (uri, r.text)
-            raise(Exception(msg))
-        obj = DCIResource(
-            self._transport,
-            self._resource,
-            list(r.json().values())[0])
-        return obj
 
 
 class Transport:
