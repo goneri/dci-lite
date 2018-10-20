@@ -3,13 +3,17 @@ import dci_lite.client
 import json
 import pytest
 import requests
-import StringIO
+
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 
 def r_answer(content, status_code=200):
     r = requests.Response()
     r.status_code = status_code
-    r.raw = StringIO.StringIO(content)
+    r.raw = StringIO(content)
     return r
 
 
