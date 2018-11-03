@@ -1,9 +1,11 @@
-import dateutil.parser
-
-from dciclient.v1.api import context as dci_context
+""""DCI-Lite Client"""
 
 import os
 import json
+
+import dateutil.parser
+
+from dciclient.v1.api import context as dci_context
 
 
 class DCILiteNotFound(Exception):
@@ -28,7 +30,7 @@ def kwargs_to_data(kwargs):
     return data
 
 
-class DCIResource():
+class DCIResource():  # pylint: disable=too-many-arguments,too-many-instance-attributes
     def __init__(self, transport, resource, data,
                  parent_resource=None, subresource=None):
         self._transport = transport
@@ -49,19 +51,20 @@ class DCIResource():
             msg = 'resource not found at %s: %s' % (uri, r.text)
             raise DCILiteNotFound(msg)
         if r.status_code != 200:
-            raise(Exception('Failed to get resource %s: %s' % (uri, r.text)))
+            raise Exception('Failed to get resource %s: %s' % (uri, r.text))
         obj = cls(transport, resource, list(r.json().values())[0])
         return obj
 
     def _build_uri(self):
         if self._subresource:
-            return '%s/%s/%s/%s' % (
+            uri = '%s/%s/%s/%s' % (
                 self._transport.dci_cs_api,
                 self._resource,
                 self._parent_resource.id,
                 self._subresource)
         else:
-            return '%s/%s' % (self._transport.dci_cs_api, self._resource)
+            uri = '%s/%s' % (self._transport.dci_cs_api, self._resource)
+        return uri
 
     def refresh(self):
         uri = '%s/%s' % (self._uri, self.id)
@@ -79,7 +82,7 @@ class DCIResource():
                                 json=self._new_data)
         if r.status_code != 200:
             msg = 'Failed to commit object %s: %s' % (uri, r.text)
-            raise(Exception(msg))
+            raise Exception(msg)
         self._load_data(list(r.json().values())[0])
 
     def _load_data(self, data):
@@ -109,7 +112,7 @@ class DCIResource():
             self._uri, self._data, self._new_data)
 
     def __getattr__(self, name):
-        def return_func(name, params={}):
+        def return_func(name):
             if name + '_id' in self.__dict__['_data']:
                 guessed_resource_name = name + 's'
                 # NOTE: We should be able to just create a new DCIResource
@@ -119,7 +122,7 @@ class DCIResource():
                         self._transport,
                         resource=guessed_resource_name,
                         item_id=self.__dict__['_data'][name + '_id'])
-                return self.__dict__['_fk'][name]
+                ret = self.__dict__['_fk'][name]
             else:
                 if name not in self.__dict__['_fk']:
                     self.__dict__['_fk'][name] = DCIResourceCollection(
@@ -127,13 +130,16 @@ class DCIResource():
                         self._resource,
                         parent_resource=self,
                         subresource=name)
-                return self.__dict__['_fk'][name]
+                ret = self.__dict__['_fk'][name]
+            return ret
 
         if name.startswith('_'):
-            return self.__dict__[name]
+            value = self.__dict__[name]
         elif name in self.__dict__['_data']:
-            return self.__dict__['_data'][name]
-        return return_func(name)
+            value = self.__dict__['_data'][name]
+        else:
+            value = return_func(name)
+        return value
 
     def __setattr__(self, name, value):
         if name.startswith('_'):
@@ -163,15 +169,16 @@ class DCIResourceCollection:
 
     def _build_uri(self):
         if self._subresource:
-            return '%s/%s/%s/%s' % (
+            uri = '%s/%s/%s/%s' % (
                 self._transport.dci_cs_api,
                 self._resource,
                 self._parent_resource.id,
                 self._subresource)
         else:
-            return '%s/%s' % (
+            uri = '%s/%s' % (
                 self._transport.dci_cs_api,
                 self._resource)
+        return uri
 
     def add(self, **kwargs):
         uri = self._uri
@@ -190,23 +197,25 @@ class DCIResourceCollection:
                 json=data)
         new_entry = list(r.json().values())[0]
         if r.status_code != 201:
-            raise(Exception('Failed to add %s: %s' % (uri, r.text)))
+            raise Exception('Failed to add %s: %s' % (uri, r.text))
+
         if not isinstance(new_entry, dict):
             # probably a new jointure entry, we don't return
             # anything
-            pass
+            new_resource = None
         elif self._subresource:
-            return DCIResource(
+            new_resource = DCIResource(
                 self._transport,
                 self._resource,
                 new_entry,
                 parent_resource=self._parent_resource,
                 subresource=self._subresource)
         else:
-            return DCIResource(
+            new_resource = DCIResource(
                 self._transport,
                 self._resource,
                 new_entry,)
+        return new_resource
 
     def __iter__(self):
         return self.list()
@@ -228,7 +237,7 @@ class DCIResourceCollection:
             raise DCILiteNotFound(msg)
         if r.status_code != 200:
             msg = 'Failed to get resource %s: %s' % (uri, r.text)
-            raise(Exception(msg))
+            raise Exception(msg)
         obj = DCIResource(
             self._transport,
             self._resource,
@@ -271,7 +280,7 @@ class DCIResourceCollection:
             raise DCILiteNotFound(msg)
         try:
             j = r.json()
-        except (ValueError):
+        except ValueError:
             msg = 'Invalid answer from server for %s: %s' % (uri, r.text)
             raise Exception(msg)
         return j['_meta']['count']
@@ -304,7 +313,7 @@ class DCIResourceCollection:
                 msg = 'Invalid answer from server for %s: %s' % (uri, r.text)
                 raise Exception(msg)
             items = list(j.values())[0]
-            if not len(items):
+            if not items:
                 break
             for i in items:
                 yield DCIResource(self._transport, resource_type, i)
@@ -319,7 +328,7 @@ class DCIResourceCollection:
                 timeout=HTTP_TIMEOUT,
                 data=json.dumps(kwargs_to_data(kwargs)))
             if not r.ok:
-                raise(Exception('Failed to call %s: %s' % (uri, r.text)))
+                raise Exception('Failed to call %s: %s' % (uri, r.text))
             try:
                 return DCIResource(
                     self._transport,
@@ -376,6 +385,6 @@ class DCIClient:
         return cls(Transport(context))
 
     def __getattr__(self, resource):
-        def return_collection(params={}):
+        def return_collection():
             return DCIResourceCollection(self._transport, resource)
-        return return_collection(resource)
+        return return_collection()
