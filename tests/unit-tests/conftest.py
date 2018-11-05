@@ -11,7 +11,7 @@ import io
 
 def r_answer(content, status_code=200):
     r = requests.Response()
-    if sys.version_info < (3,0):
+    if sys.version_info < (3, 0):
         bContent = io.BytesIO(content.encode())
     else:
         bContent = io.BytesIO(content.encode('utf-8'))
@@ -38,7 +38,7 @@ def no_requests(monkeypatch):
 def read_only_env(monkeypatch):
     def f(*a, **b):
         if a[1] == 'http://a/api/v1/jobs':
-            data =json.dumps({
+            data = json.dumps({
                 "jobs": [{
                     "id": "1",
                     "name": "jack",

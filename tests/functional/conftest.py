@@ -44,6 +44,7 @@ def my_team(c, my_topic):
 def my_remoteci(c, my_team):
     return c.remotecis.add(name='my_remoteci', team=my_team)
 
+
 @pytest.fixture
 def my_topic(c):
     return c.topics.add(name='my_topic')

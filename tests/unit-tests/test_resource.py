@@ -75,7 +75,7 @@ def test_commit(c, read_only_env, monkeypatch):
     assert j.name == 'foo'
 
 
-def test_commit_no_change(c, read_only_env, monkeypatch):
+def test_commit_with_change(c, read_only_env, monkeypatch):
     mock_put = mock.Mock()
     monkeypatch.setattr(dci_lite.client.Transport, 'put', mock_put)
 
@@ -86,12 +86,11 @@ def test_commit_no_change(c, read_only_env, monkeypatch):
 
 def test_commit_no_change(c, read_only_env, monkeypatch):
     def mock_delete(*a, **b):
-        assert a[1] == 'http://a/api/v1/teams/1'
-        return conftest.r_answer(
-            '',
-            status_code=204)
-    monkeypatch.setattr(dci_lite.client.Transport, 'delete', mock_delete)
+        assert False
+    monkeypatch.setattr(dci_lite.client.Transport, 'put', mock_delete)
     t = c.teams.get('1')
+    t.commit()
+    assert True
 
 
 def test_call_method(c, read_only_env, monkeypatch):

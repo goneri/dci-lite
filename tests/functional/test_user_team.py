@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+
 def test_create_user_and_team(c, my_team):
     new_user = c.users.add(
         name=u'jésså',

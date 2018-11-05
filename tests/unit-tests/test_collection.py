@@ -38,7 +38,6 @@ def test_find_or_add_creates(c, read_only_env, monkeypatch):
     assert t.id == '3'
 
 
-
 def test_add(c, monkeypatch):
     monkeypatch.setattr(dci_lite.client.Transport, 'post', mock_post)
     t = c.teams.add(name='Habs')

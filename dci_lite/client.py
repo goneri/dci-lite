@@ -2,8 +2,6 @@
 """"DCI-Lite Client"""
 
 import os
-import json
-
 import dateutil.parser
 
 from dciclient.v1.api import context as dci_context
@@ -31,7 +29,7 @@ def kwargs_to_data(kwargs):
     return data
 
 
-class DCIResource():  # pylint: disable=too-many-arguments,too-many-instance-attributes
+class DCIResource():
     def __init__(self, transport, resource, data,
                  parent_resource=None, subresource=None):
         self._transport = transport
@@ -300,9 +298,6 @@ class DCIResourceCollection:
         data = kwargs_to_data(kwargs)
         data['limit'] = data.get('limit', 1000)
 
-        # Type of resource that we will loop
-        resource_type = self._subresource or self._resource
-
         data['offset'] = 0
         while True:
             r = self._transport.get(
@@ -320,11 +315,15 @@ class DCIResourceCollection:
                 raise Exception(msg)
             items = list(j.values())[0]
             for i in items:
-                yield DCIResource(self._transport, self._resource, i, parent_resource=self._parent_resource, subresource=self._subresource)
+                yield DCIResource(
+                    self._transport,
+                    self._resource,
+                    i,
+                    parent_resource=self._parent_resource,
+                    subresource=self._subresource)
             data['offset'] += data['limit']
             if len(items) < data['limit']:
                 break
-
 
     # generic method to handle the POST call
     def __getattr__(self, name):
@@ -333,7 +332,7 @@ class DCIResourceCollection:
             r = self._transport.post(
                 uri,
                 timeout=HTTP_TIMEOUT,
-                data=json.dumps(kwargs_to_data(kwargs)))
+                json=kwargs_to_data(kwargs))
             if not r.ok:
                 raise Exception('Failed to call %s: %s' % (uri, r.text))
             try:
