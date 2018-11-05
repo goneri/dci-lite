@@ -1,12 +1,4 @@
-import dci_lite.client
-
-c = dci_lite.client.DCIClient.for_user(
-    dci_login='admin',
-    dci_password='admin',
-    dci_cs_url='http://localhost:5000')
-
-
-def test_create_update_purge_resource():
+def test_create_update_purge_resource(c):
     new_topic = c.topics.add(name='roberto')
     assert new_topic.name == 'roberto'
     my_topic_search_result = c.topics.first(where='name:roberto')

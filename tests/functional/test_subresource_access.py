@@ -1,12 +1,4 @@
-import dci_lite.client
-
-c = dci_lite.client.DCIClient.for_user(
-    dci_login='admin',
-    dci_password='admin',
-    dci_cs_url='http://localhost:5000')
-
-
-def test_subresource():
+def test_subresource(c):
     a_team = c.teams.add(name='A_team')
     my_topic = c.topics.add(name='my_totopic')
     topic_cpt = my_topic.teams.len()
