@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """"DCI-Lite Client"""
 
 import os
@@ -145,6 +146,11 @@ class DCIResource():  # pylint: disable=too-many-arguments,too-many-instance-att
         if name.startswith('_'):
             self.__dict__[name] = value
             return
+
+        data = kwargs_to_data({name: value})
+        name = list(data.keys())[0]
+        value = list(data.values())[0]
+
         self._data[name] = value
         self._new_data[name] = value
 
@@ -313,11 +319,12 @@ class DCIResourceCollection:
                 msg = 'Invalid answer from server for %s: %s' % (uri, r.text)
                 raise Exception(msg)
             items = list(j.values())[0]
-            if not items:
-                break
             for i in items:
-                yield DCIResource(self._transport, resource_type, i)
+                yield DCIResource(self._transport, self._resource, i, parent_resource=self._parent_resource, subresource=self._subresource)
             data['offset'] += data['limit']
+            if len(items) < data['limit']:
+                break
+
 
     # generic method to handle the POST call
     def __getattr__(self, name):

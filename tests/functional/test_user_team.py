@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import dci_lite.client
 
 c = dci_lite.client.DCIClient.for_user(
@@ -10,15 +11,15 @@ def test_create_user_and_team():
     team_rocket = c.teams.add(name='team_rocket')
     assert team_rocket.id
     new_user = c.users.add(
-        name='jess',
+        name=u'jésså',
         team=team_rocket,
         email='jesse@team.rocket',
         # NOTE: server will reject an user creation with
         # password
         password='',
         fullname='Jesse')
-    assert new_user.team.name == 'team_rocket'
-    new_user.team.name = 'Team Rocket!'
+    assert new_user.team.name == u'team_rocket'
+    new_user.team.name = u'Team Rocket! :Ð'
     new_user.team.commit()
     team_rocket.refresh()
-    assert team_rocket.name == 'Team Rocket!'
+    assert team_rocket.name == u'Team Rocket! :Ð'
