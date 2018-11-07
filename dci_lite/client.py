@@ -15,6 +15,10 @@ class DCILiteDeleteFailure(Exception):
     pass
 
 
+class DCILiteFailure(Exception):
+    pass
+
+
 HTTP_TIMEOUT = 600
 
 
@@ -199,9 +203,9 @@ class DCIResourceCollection:
                 uri,
                 timeout=HTTP_TIMEOUT,
                 json=data)
-        new_entry = list(r.json().values())[0]
         if r.status_code != 201:
-            raise Exception('Failed to add %s: %s' % (uri, r.text))
+            raise DCILiteFailure('Failed to add %s: %s' % (uri, r.text))
+        new_entry = list(r.json().values())[0]
 
         if not isinstance(new_entry, dict):
             # probably a new jointure entry, we don't return
