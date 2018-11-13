@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import dci_lite.client
+import dci.client
 
 import conftest
 import mock
@@ -22,7 +22,7 @@ def test_delete(c, read_only_env, monkeypatch):
         return conftest.r_answer(
             '{"_meta": {"count": 1}}',
             status_code=204)
-    monkeypatch.setattr(dci_lite.client.Transport, 'delete', mock_delete)
+    monkeypatch.setattr(dci.client.Transport, 'delete', mock_delete)
 
     j = c.jobs.get('1')
     j.delete()
@@ -67,7 +67,7 @@ def test_commit(c, read_only_env, monkeypatch):
         assert b['headers']['If-match'] == 'b'
         assert b['json']['name'] == 'foo'
         return conftest.r_answer('{"_meta": {"count": 1}}', status_code=200)
-    monkeypatch.setattr(dci_lite.client.Transport, 'put', mock_put)
+    monkeypatch.setattr(dci.client.Transport, 'put', mock_put)
 
     j = c.jobs.get('1')
     j.name = 'foo'
@@ -77,7 +77,7 @@ def test_commit(c, read_only_env, monkeypatch):
 
 def test_commit_with_change(c, read_only_env, monkeypatch):
     mock_put = mock.Mock()
-    monkeypatch.setattr(dci_lite.client.Transport, 'put', mock_put)
+    monkeypatch.setattr(dci.client.Transport, 'put', mock_put)
 
     j = c.jobs.get('1')
     j.commit()
@@ -87,7 +87,7 @@ def test_commit_with_change(c, read_only_env, monkeypatch):
 def test_commit_no_change(c, read_only_env, monkeypatch):
     def mock_delete(*a, **b):
         assert False
-    monkeypatch.setattr(dci_lite.client.Transport, 'put', mock_delete)
+    monkeypatch.setattr(dci.client.Transport, 'put', mock_delete)
     t = c.teams.get('1')
     t.commit()
     assert True
@@ -99,6 +99,6 @@ def test_call_method(c, read_only_env, monkeypatch):
         return conftest.r_answer(
             '{"job": {"id": "4"}}',
             status_code=201)
-    monkeypatch.setattr(dci_lite.client.Transport, 'post', mock_post)
+    monkeypatch.setattr(dci.client.Transport, 'post', mock_post)
     j = c.jobs.schedule()
     assert j.id

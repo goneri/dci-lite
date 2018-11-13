@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import dci_lite.client
+import dci.client
 
 import conftest
 
@@ -29,7 +29,7 @@ def test_add_subresource_with_data(c, read_only_env, monkeypatch):
 
     new_component = c.components.get('1')
     fd = StringIO('fooo')
-    monkeypatch.setattr(dci_lite.client.Transport, 'post', mock_post)
+    monkeypatch.setattr(dci.client.Transport, 'post', mock_post)
     my_file = new_component.files.add(data=fd)
     assert my_file.id == "1"
 
@@ -44,6 +44,6 @@ def test_get_subresource_with_data(c, read_only_env, monkeypatch, tmpdir):
     new_component = c.components.get('1')
     my_file = new_component.files.first()
     assert my_file.id == "1"
-    monkeypatch.setattr(dci_lite.client.Transport, 'get', mock_get)
+    monkeypatch.setattr(dci.client.Transport, 'get', mock_get)
     my_file.download(str(tmpdir.join('file')))
     assert tmpdir.join('file').read() == 'fooo'

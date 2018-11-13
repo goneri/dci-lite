@@ -17,20 +17,19 @@
 
 import setuptools
 
-import dci_lite
+import dci
 
 
 setuptools.setup(
-    name='dci_lite',
-    version=dci_lite.__version__,
+    name='dci',
+    version=dci.__version__,
     author='Gonéri Le Bouder',
     author_email='goneri@lebouder.net',
     description='An alternative client for the distributed-ci.io',
     url='https://github.com/goneri/dci-lite',
     license='Apache v2.0',
-    packages=['dci_lite'],
+    packages=['dci'],
     install_requires=[
         'python-dateutil',
-        'dciclient',
     ],
 )

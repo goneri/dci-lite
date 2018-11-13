@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import pytest
 
-import dci_lite.client
+import dci.client
 
 import conftest
 
@@ -41,21 +41,21 @@ def test_find_or_add_exists(c, read_only_env):
 
 
 def test_find_or_add_creates(c, read_only_env, monkeypatch):
-    monkeypatch.setattr(dci_lite.client.Transport, 'get', mock_get)
-    monkeypatch.setattr(dci_lite.client.Transport, 'post', mock_post)
+    monkeypatch.setattr(dci.client.Transport, 'get', mock_get)
+    monkeypatch.setattr(dci.client.Transport, 'post', mock_post)
     t = c.teams.find_or_add(name="Bob L'éponge")
     assert t.id == '3'
 
 
 def test_add(c, monkeypatch):
-    monkeypatch.setattr(dci_lite.client.Transport, 'post', mock_post)
+    monkeypatch.setattr(dci.client.Transport, 'post', mock_post)
     t = c.teams.add(name='Habs')
     assert t.id == '3'
 
 
 def test_add_failure(c, monkeypatch):
-    monkeypatch.setattr(dci_lite.client.Transport, 'post', mock_post_failure)
-    with pytest.raises(dci_lite.client.DCILiteFailure) as excinfo:
+    monkeypatch.setattr(dci.client.Transport, 'post', mock_post_failure)
+    with pytest.raises(dci.client.DCILiteFailure) as excinfo:
         c.teams.add(name='Habs')
 
 
@@ -75,6 +75,6 @@ def test_first(c, read_only_env):
 
 
 def test_delete(c, read_only_env, monkeypatch):
-    monkeypatch.setattr(dci_lite.client.Transport, 'delete', mock_delete)
+    monkeypatch.setattr(dci.client.Transport, 'delete', mock_delete)
     t = c.teams['1']
     del c.teams[t]

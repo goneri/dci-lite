@@ -1,11 +1,11 @@
 import pytest
 
-import dci_lite.client
+import dci.client
 
 
 @pytest.fixture
 def c():
-    c = dci_lite.client.DCIClient.for_user(
+    c = dci.client.DCIClient.for_user(
         dci_login='admin',
         dci_password='admin',
         dci_cs_url='http://localhost:5000')
@@ -27,7 +27,7 @@ def c():
 
 @pytest.fixture
 def c_rci(my_remoteci):
-    return dci_lite.client.DCIClient.for_remoteci(
+    return dci.client.DCIClient.for_remoteci(
         dci_client_id=my_remoteci.id,
         dci_api_secret=my_remoteci.api_secret,
         dci_cs_url='http://localhost:5000')
