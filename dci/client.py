@@ -36,7 +36,7 @@ def kwargs_to_data(kwargs):
 class DCIResource():
     def __init__(self, transport, resource, data,
                  parent_resource=None, subresource=None):
-        self._transport = transport
+        self._client = transport
         self._resource = resource
         self._parent_resource = parent_resource
         self._subresource = subresource
@@ -61,17 +61,17 @@ class DCIResource():
     def _build_uri(self):
         if self._subresource:
             uri = '%s/%s/%s/%s' % (
-                self._transport.dci_cs_api,
+                self._client.dci_cs_api,
                 self._resource,
                 self._parent_resource.id,
                 self._subresource)
         else:
-            uri = '%s/%s' % (self._transport.dci_cs_api, self._resource)
+            uri = '%s/%s' % (self._client.dci_cs_api, self._resource)
         return uri
 
     def refresh(self):
         uri = '%s/%s' % (self._uri, self.id)
-        r = self._transport.get(uri)
+        r = self._client.get(uri)
         self._load_data(list(r.json().values())[0])
 
     def commit(self):
@@ -80,9 +80,9 @@ class DCIResource():
             return
 
         uri = self._uri + '/' + self._data['id']
-        r = self._transport.put(uri, timeout=HTTP_TIMEOUT,
-                                headers={'If-match': self._data['etag']},
-                                json=self._new_data)
+        r = self._client.put(uri, timeout=HTTP_TIMEOUT,
+                             headers={'If-match': self._data['etag']},
+                             json=self._new_data)
         if r.status_code != 200:
             msg = 'Failed to commit object %s: %s' % (uri, r.text)
             raise Exception(msg)
@@ -98,7 +98,7 @@ class DCIResource():
 
     def download(self, target):
         uri = self._uri + '/' + self._data['id'] + '/content'
-        r = self._transport.get(
+        r = self._client.get(
             uri,
             stream=True,
             timeout=HTTP_TIMEOUT)
@@ -122,14 +122,14 @@ class DCIResource():
                 # instance here.
                 if name not in self.__dict__['_fk']:
                     self.__dict__['_fk'][name] = DCIResource.from_id(
-                        self._transport,
+                        self._client,
                         resource=guessed_resource_name,
                         item_id=self.__dict__['_data'][name + '_id'])
                 ret = self.__dict__['_fk'][name]
             else:
                 if name not in self.__dict__['_fk']:
                     self.__dict__['_fk'][name] = DCIResourceCollection(
-                        self._transport,
+                        self._client,
                         self._resource,
                         parent_resource=self,
                         subresource=name)
@@ -158,7 +158,7 @@ class DCIResource():
 
     def delete(self):
         uri = self._uri + '/' + self.id
-        r = self._transport.delete(
+        r = self._client.delete(
             uri, timeout=HTTP_TIMEOUT,
             headers={'If-match': self._data['etag']})
         if r.status_code != 204:
@@ -169,7 +169,7 @@ class DCIResource():
 class DCIResourceCollection:
     def __init__(self, transport, resource,
                  parent_resource=None, subresource=None):
-        self._transport = transport
+        self._client = transport
         self._resource = resource
         self._parent_resource = parent_resource
         self._subresource = subresource
@@ -178,13 +178,13 @@ class DCIResourceCollection:
     def _build_uri(self):
         if self._subresource:
             uri = '%s/%s/%s/%s' % (
-                self._transport.dci_cs_api,
+                self._client.dci_cs_api,
                 self._resource,
                 self._parent_resource.id,
                 self._subresource)
         else:
             uri = '%s/%s' % (
-                self._transport.dci_cs_api,
+                self._client.dci_cs_api,
                 self._resource)
         return uri
 
@@ -193,13 +193,13 @@ class DCIResourceCollection:
 
         if 'data' in kwargs and hasattr(kwargs['data'], 'read'):
             # Stream mode
-            r = self._transport.post(
+            r = self._client.post(
                 uri,
                 timeout=HTTP_TIMEOUT,
                 data=kwargs['data'])
         else:
             data = kwargs_to_data(kwargs)
-            r = self._transport.post(
+            r = self._client.post(
                 uri,
                 timeout=HTTP_TIMEOUT,
                 json=data)
@@ -213,14 +213,14 @@ class DCIResourceCollection:
             new_resource = None
         elif self._subresource:
             new_resource = DCIResource(
-                self._transport,
+                self._client,
                 self._resource,
                 new_entry,
                 parent_resource=self._parent_resource,
                 subresource=self._subresource)
         else:
             new_resource = DCIResource(
-                self._transport,
+                self._client,
                 self._resource,
                 new_entry,)
         return new_resource
@@ -236,7 +236,7 @@ class DCIResourceCollection:
 
     def get(self, item_id, **kwargs):
         uri = self._uri + '/' + item_id
-        r = self._transport.get(
+        r = self._client.get(
             uri,
             timeout=HTTP_TIMEOUT,
             params=kwargs)
@@ -247,14 +247,14 @@ class DCIResourceCollection:
             msg = 'Failed to get resource %s: %s' % (uri, r.text)
             raise Exception(msg)
         obj = DCIResource(
-            self._transport,
+            self._client,
             self._resource,
             list(r.json().values())[0])
         return obj
 
     def delete(self, item):
         uri = self._uri + '/' + item.id
-        r = self._transport.delete(
+        r = self._client.delete(
             uri,
             timeout=HTTP_TIMEOUT,
             headers={'If-match': item.etag})
@@ -279,7 +279,7 @@ class DCIResourceCollection:
         data = kwargs_to_data(kwargs)
         data['limit'] = 1
 
-        r = self._transport.get(
+        r = self._client.get(
             uri,
             timeout=HTTP_TIMEOUT,
             params=data)
@@ -304,7 +304,7 @@ class DCIResourceCollection:
 
         data['offset'] = 0
         while True:
-            r = self._transport.get(
+            r = self._client.get(
                 uri,
                 timeout=HTTP_TIMEOUT,
                 params=data)
@@ -320,7 +320,7 @@ class DCIResourceCollection:
             items = list(j.values())[0]
             for i in items:
                 yield DCIResource(
-                    self._transport,
+                    self._client,
                     self._resource,
                     i,
                     parent_resource=self._parent_resource,
@@ -333,7 +333,7 @@ class DCIResourceCollection:
     def __getattr__(self, name):
         def return_func(**kwargs):
             uri = self._uri + '/' + name
-            r = self._transport.post(
+            r = self._client.post(
                 uri,
                 timeout=HTTP_TIMEOUT,
                 json=kwargs_to_data(kwargs))
@@ -341,7 +341,7 @@ class DCIResourceCollection:
                 raise Exception('Failed to call %s: %s' % (uri, r.text))
             try:
                 return DCIResource(
-                    self._transport,
+                    self._client,
                     self._resource,
                     list(r.json().values())[0])
             except ValueError:
@@ -349,52 +349,42 @@ class DCIResourceCollection:
         return return_func
 
 
-class Transport:
-    def __init__(self, context):
+class DCIClient:
+
+    def __init__(self, dci_login=None, dci_password=None, dci_cs_url=None,
+                 dci_client_id=None, dci_api_secret=None):
+
+        if dci_login:
+            context = dci_context.build_dci_context(
+                dci_login=dci_login,
+                dci_password=dci_password,
+                dci_cs_url=dci_cs_url)
+        else:
+            context = dci_context.build_signature_context(
+                dci_cs_url=dci_cs_url,
+                dci_client_id=dci_client_id,
+                dci_api_secret=dci_api_secret)
         self._context = context
         self._session = context.session
         self.dci_cs_api = self._context.dci_cs_api
 
+    def request(self, verb, uri, **kargs):
+        action = getattr(self._session, verb)
+        return action(uri, **kargs)
+
     def put(self, uri, **kargs):
-        r = self._session.put(uri, **kargs)
-        return r
+        return self.request('put', uri, **kargs)
 
     def post(self, uri, **kargs):
-        r = self._session.post(uri, **kargs)
-        return r
+        return self.request('post', uri, **kargs)
 
     def delete(self, uri, **kargs):
-        r = self._session.delete(uri, **kargs)
-        return r
+        return self.request('delete', uri, **kargs)
 
     def get(self, uri, **kargs):
-        r = self._session.get(uri, **kargs)
-        return r
-
-
-class DCIClient:
-
-    def __init__(self, transport):
-        self._transport = transport
-
-    @classmethod
-    def for_user(cls, dci_login=None, dci_password=None, dci_cs_url=None):
-        context = dci_context.build_dci_context(
-            dci_login=dci_login,
-            dci_password=dci_password,
-            dci_cs_url=dci_cs_url)
-        return cls(Transport(context))
-
-    @classmethod
-    def for_remoteci(cls, dci_client_id=None, dci_api_secret=None,
-                     dci_cs_url=None):
-        context = dci_context.build_signature_context(
-            dci_cs_url=dci_cs_url,
-            dci_client_id=dci_client_id,
-            dci_api_secret=dci_api_secret)
-        return cls(Transport(context))
+        return self.request('get', uri, **kargs)
 
     def __getattr__(self, resource):
         def return_collection():
-            return DCIResourceCollection(self._transport, resource)
+            return DCIResourceCollection(self, resource)
         return return_collection()

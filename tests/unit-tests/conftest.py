@@ -23,7 +23,7 @@ def r_answer(content, status_code=200):
 
 @pytest.fixture
 def c():
-    return dci.client.DCIClient.for_user(
+    return dci.client.DCIClient(
         dci_login='admin',
         dci_password='admin',
         dci_cs_url='http://a')
@@ -132,4 +132,4 @@ def read_only_env(monkeypatch):
             raise Exception('Bad request: %s' % a[1])
 
         return r_answer(data)
-    monkeypatch.setattr(dci.client.Transport, 'get', f)
+    monkeypatch.setattr(dci.client.DCIClient, 'get', f)
