@@ -351,19 +351,19 @@ class DCIResourceCollection:
 
 class DCIClient:
 
-    def __init__(self, dci_login=None, dci_password=None, dci_cs_url=None,
-                 dci_client_id=None, dci_api_secret=None):
+    def __init__(self, dci_login=None, dci_password=None, dci_client_id=None,
+                 dci_api_secret=None, **kwargs):
 
         if dci_login:
-            context = dci_context.build_dci_context(
+            context = dci.context.build_dci_context(
                 dci_login=dci_login,
                 dci_password=dci_password,
-                dci_cs_url=dci_cs_url)
+                **kwargs)
         else:
-            context = dci_context.build_signature_context(
-                dci_cs_url=dci_cs_url,
+            context = dci.context.build_signature_context(
                 dci_client_id=dci_client_id,
-                dci_api_secret=dci_api_secret)
+                dci_api_secret=dci_api_secret,
+                **kwargs)
         self._context = context
         self._session = context.session
         self.dci_cs_api = self._context.dci_cs_api

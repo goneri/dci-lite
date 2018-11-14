@@ -1,4 +1,5 @@
 import pytest
+import requests.exceptions
 
 import dci.client
 
@@ -8,9 +9,13 @@ def c():
     c = dci.client.DCIClient(
         dci_login='admin',
         dci_password='admin',
-        dci_cs_url='http://localhost:5000')
-    if c.teams.len() > 1 or c.users.len() > 1:
-        pytest.skip("DB is not empty")
+        dci_cs_url='http://localhost:5000',
+        max_retries=1)
+    try:
+        if c.teams.len() > 1 or c.users.len() > 1:
+            pytest.skip("DB is not empty")
+    except requests.exceptions.ConnectionError:
+        pytest.skip("DCI dev env not available")
 
     yield c
     for team in c.teams:
@@ -30,7 +35,8 @@ def c_rci(my_remoteci):
     return dci.client.DCIClient(
         dci_client_id=my_remoteci.id,
         dci_api_secret=my_remoteci.api_secret,
-        dci_cs_url='http://localhost:5000')
+        dci_cs_url='http://localhost:5000',
+        max_retries=1)
 
 
 @pytest.fixture
