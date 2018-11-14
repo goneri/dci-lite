@@ -26,7 +26,7 @@ setuptools.setup(
     author='Gonéri Le Bouder',
     author_email='goneri@lebouder.net',
     description='An alternative client for the distributed-ci.io',
-    url='https://github.com/goneri/dci-lite',
+    url='https://github.com/goneri/python-dci',
     license='Apache v2.0',
     packages=['dci'],
     install_requires=[
