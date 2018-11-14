@@ -7,15 +7,15 @@ import dateutil.parser
 import dci.context
 
 
-class DCILiteNotFound(Exception):
+class DCIClientNotFound(Exception):
     pass
 
 
-class DCILiteDeleteFailure(Exception):
+class DCIClientDeleteFailure(Exception):
     pass
 
 
-class DCILiteFailure(Exception):
+class DCIClientFailure(Exception):
     pass
 
 
@@ -52,7 +52,7 @@ class DCIResource():
         r = transport.get(uri, timeout=HTTP_TIMEOUT, params=kwargs)
         if r.status_code == 404:
             msg = 'resource not found at %s: %s' % (uri, r.text)
-            raise DCILiteNotFound(msg)
+            raise DCIClientNotFound(msg)
         if r.status_code != 200:
             raise Exception('Failed to get resource %s: %s' % (uri, r.text))
         obj = cls(transport, resource, list(r.json().values())[0])
@@ -162,7 +162,7 @@ class DCIResource():
             uri, timeout=HTTP_TIMEOUT,
             headers={'If-match': self._data['etag']})
         if r.status_code != 204:
-            raise DCILiteDeleteFailure('failed to delete at %s: %s' % (
+            raise DCIClientDeleteFailure('failed to delete at %s: %s' % (
                 uri, r.text))
 
 
@@ -204,7 +204,7 @@ class DCIResourceCollection:
                 timeout=HTTP_TIMEOUT,
                 json=data)
         if r.status_code != 201:
-            raise DCILiteFailure('Failed to add %s: %s' % (uri, r.text))
+            raise DCIClientFailure('Failed to add %s: %s' % (uri, r.text))
         new_entry = list(r.json().values())[0]
 
         if not isinstance(new_entry, dict):
@@ -242,7 +242,7 @@ class DCIResourceCollection:
             params=kwargs)
         if r.status_code == 404:
             msg = 'resource not found at %s: %s' % (uri, r.text)
-            raise DCILiteNotFound(msg)
+            raise DCIClientNotFound(msg)
         if r.status_code != 200:
             msg = 'Failed to get resource %s: %s' % (uri, r.text)
             raise Exception(msg)
@@ -259,7 +259,7 @@ class DCIResourceCollection:
             timeout=HTTP_TIMEOUT,
             headers={'If-match': item.etag})
         if r.status_code != 204:
-            raise DCILiteDeleteFailure('failed to delete at %s: %s' % (
+            raise DCIClientDeleteFailure('failed to delete at %s: %s' % (
                 uri, r.text))
         return r
 
@@ -285,7 +285,7 @@ class DCIResourceCollection:
             params=data)
         if r.status_code == 404:
             msg = 'Resource not found at %s: %s' % (uri, r.text)
-            raise DCILiteNotFound(msg)
+            raise DCIClientNotFound(msg)
         try:
             j = r.json()
         except ValueError:
@@ -310,7 +310,7 @@ class DCIResourceCollection:
                 params=data)
             if r.status_code == 404:
                 msg = 'resource not found at %s: %s' % (uri, r.text)
-                raise DCILiteNotFound(msg)
+                raise DCIClientNotFound(msg)
             try:
                 j = r.json()
                 del j['_meta']
