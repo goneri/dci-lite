@@ -17,12 +17,12 @@
 
 import setuptools
 
-import dci
+import dci.version
 
 
 setuptools.setup(
     name='dci',
-    version=dci.__version__,
+    version=dci.version.__version__,
     author='Gonéri Le Bouder',
     author_email='goneri@lebouder.net',
     description='An alternative client for the distributed-ci.io',

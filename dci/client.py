@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-""""DCI-Lite Client"""
+""""DCI Client"""
 
 import os
 import dateutil.parser
 
-from dciclient.v1.api import context as dci_context
+import dci.context
 
 
 class DCILiteNotFound(Exception):
