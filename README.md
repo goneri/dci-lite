@@ -1,3 +1,3 @@
-# an Object Oriented API for Distributed-CI
+# python-dci
 
-`dci-lite` aims to provide a light layer to interact with Distributed-CI.
+`python-dci` is a transport layer with a nice API to interact with Distributed-CI.
