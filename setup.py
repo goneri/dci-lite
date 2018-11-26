@@ -31,5 +31,7 @@ setuptools.setup(
     packages=['dci'],
     install_requires=[
         'python-dateutil',
+        'requests',
+        'dciauth'
     ],
 )
