@@ -191,18 +191,28 @@ class DCIResourceCollection:
     def add(self, **kwargs):
         uri = self._uri
 
-        if 'data' in kwargs and hasattr(kwargs['data'], 'read'):
+        data = kwargs_to_data(kwargs)
+        headers = {}
+        for k, v in {
+                'DCI-NAME': 'name',
+                'DCI-JOB-ID': 'job_id',
+                'DCI-JOBSTATE-ID': 'jobstate_id'}.items():
+            if v in data:
+                headers[k] = data[v]
+
+        if 'data' in data and hasattr(data['data'], 'read'):
             # Stream mode
             r = self._client.post(
                 uri,
                 timeout=HTTP_TIMEOUT,
-                data=kwargs['data'])
+                data=data['data'],
+                headers=headers)
         else:
-            data = kwargs_to_data(kwargs)
             r = self._client.post(
                 uri,
                 timeout=HTTP_TIMEOUT,
-                json=data)
+                json=data,
+                headers=headers)
         if r.status_code != 201:
             raise DCIClientFailure('Failed to add %s: %s' % (uri, r.text))
         new_entry = list(r.json().values())[0]
