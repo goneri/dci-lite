@@ -378,7 +378,14 @@ class DCIClient:
         self._session = context.session
         self.dci_cs_api = self._context.dci_cs_api
 
+    def canonical_uri(self, uri):
+        if uri.startswith('/'):
+            return "%s%s" % (self.dci_cs_api.rstrip('/'), uri)
+        else:
+            return uri
+
     def request(self, verb, uri, **kargs):
+        uri = self.canonical_uri(uri)
         action = getattr(self._session, verb)
         return action(uri, **kargs)
 
