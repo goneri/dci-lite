@@ -55,7 +55,7 @@ def test_add(c, monkeypatch):
 
 def test_add_failure(c, monkeypatch):
     monkeypatch.setattr(dci.client.DCIClient, 'post', mock_post_failure)
-    with pytest.raises(dci.client.DCILiteFailure) as excinfo:
+    with pytest.raises(dci.client.DCIClientFailure) as excinfo:
         c.teams.add(name='Habs')
 
 
