@@ -193,12 +193,13 @@ class DCIResourceCollection:
 
         data = kwargs_to_data(kwargs)
         headers = {}
-        for k, v in {
-                'DCI-NAME': 'name',
-                'DCI-JOB-ID': 'job_id',
-                'DCI-JOBSTATE-ID': 'jobstate_id'}.items():
-            if v in data:
-                headers[k] = data[v]
+
+        if self._resource == 'files':
+            for k, v in {'DCI-NAME': 'name',
+                         'DCI-JOB-ID': 'job_id',
+                         'DCI-JOBSTATE-ID': 'jobstate_id'}.items():
+                if v in data:
+                    headers[k] = data[v]
 
         if 'data' in data and hasattr(data['data'], 'read'):
             # Stream mode
