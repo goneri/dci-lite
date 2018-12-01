@@ -21,3 +21,16 @@ uri_tpl = (
 job_info = c.get(uri_tpl % job_id).json()
 print(job_info)
 ```
+
+## The Object interface
+
+This library also provide an object layer on top of the class DCI API.
+
+```python
+import dci.oo
+
+job_id = '28cd1fe9-f5a8-4f65-8f76-d6b7aa89e08d'
+
+c = dci.oo.Engine()
+j = c.jobs.get('1')
+``
