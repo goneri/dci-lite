@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import dci.client
+import dci.oo
 
 import json
 import pytest
@@ -23,7 +23,7 @@ def r_answer(content, status_code=200):
 
 @pytest.fixture
 def c():
-    return dci.client.DCIClient(
+    return dci.oo.Engine(
         dci_login='admin',
         dci_password='admin',
         dci_cs_url='http://a')

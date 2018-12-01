@@ -1,12 +1,12 @@
 import pytest
 import requests.exceptions
 
-import dci.client
+import dci.oo
 
 
 @pytest.fixture
 def c():
-    c = dci.client.DCIClient(
+    c = dci.oo.Engine(
         dci_login='admin',
         dci_password='admin',
         dci_cs_url='http://localhost:5000',
@@ -32,7 +32,7 @@ def c():
 
 @pytest.fixture
 def c_rci(my_remoteci):
-    return dci.client.DCIClient(
+    return dci.oo.Engine(
         dci_client_id=my_remoteci.id,
         dci_api_secret=my_remoteci.api_secret,
         dci_cs_url='http://localhost:5000',
