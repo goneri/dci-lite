@@ -26,6 +26,8 @@ print(job_info)
 
 This library also provide an object layer on top of the class DCI API.
 
+### Get a job record
+
 ```python
 import dci.oo
 
@@ -33,4 +35,14 @@ job_id = '28cd1fe9-f5a8-4f65-8f76-d6b7aa89e08d'
 
 c = dci.oo.Engine()
 j = c.jobs.get('1')
-``
+```
+
+### Change the admin password
+
+```python
+c = dci.oo.Engine(dci_login="admin")
+admin = c.users.first(where="name:admin")
+print(admin.name)
+admin.password = 'admin'
+admin.commit()
+```
