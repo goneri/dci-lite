@@ -15,9 +15,13 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import os
 import setuptools
 
 import dci.version
+
+root_dir = os.path.dirname(os.path.abspath(__file__))
+readme = open(os.path.join(root_dir, 'README.md')).read()
 
 
 setuptools.setup(
@@ -26,6 +30,7 @@ setuptools.setup(
     author='Gonéri Le Bouder',
     author_email='goneri@lebouder.net',
     description='An alternative client for the distributed-ci.io',
+    long_description=readme,
     url='https://github.com/goneri/python-dci',
     license='Apache v2.0',
     packages=['dci'],
