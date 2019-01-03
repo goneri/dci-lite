@@ -40,6 +40,8 @@ j = c.jobs.get('1')
 ### Change the admin password
 
 ```python
+import dci.oo
+
 c = dci.oo.Engine(dci_login="admin")
 admin = c.users.first(where="name:admin")
 print(admin.name)
