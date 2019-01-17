@@ -68,18 +68,8 @@ class DciContext(DciContextBase):
         self.session.auth = (login, password)
 
 
-def build_dci_context(dci_cs_url=None, dci_login=None, dci_password=None,
+def build_dci_context(dci_cs_url, dci_login, dci_password,
                       user_agent=None, max_retries=80):
-    dci_cs_url = dci_cs_url or os.environ.get('DCI_CS_URL', '')
-    dci_login = dci_login or os.environ.get('DCI_LOGIN', '')
-    dci_password = dci_password or os.environ.get('DCI_PASSWORD', '')
-
-    if not dci_cs_url or not dci_login or not dci_password:
-        msg = "Environment variables required: DCI_CS_URL=%s, " \
-              "DCI_LOGIN=%s, DCI_PASSWORD=%s" % \
-              (dci_cs_url, dci_login, dci_password)
-        raise Exception(msg)
-
     return DciContext(dci_cs_url.rstrip('/'), dci_login, dci_password,
                       user_agent=user_agent, max_retries=max_retries)
 
@@ -135,17 +125,10 @@ class DciSignatureContext(DciContextBase):
         self.session.auth = DciSignatureAuth(client_id, api_secret)
 
 
-def build_signature_context(dci_cs_url=None, dci_client_id=None,
-                            dci_api_secret=None,
+def build_signature_context(dci_cs_url, dci_client_id,
+                            dci_api_secret,
                             user_agent=None, max_retries=80):
-    dci_cs_url = dci_cs_url or os.environ.get('DCI_CS_URL', '')
-    dci_client_id = dci_client_id or os.environ.get('DCI_CLIENT_ID', '')
-    dci_api_secret = dci_api_secret or os.environ.get('DCI_API_SECRET', '')
 
-    if not dci_cs_url or not dci_client_id or not dci_api_secret:
-        msg = "Environment variables required: DCI_CS_URL, " \
-              "DCI_CLIENT_ID, DCI_API_SECRET"
-        raise Exception(msg)
     return DciSignatureContext(dci_cs_url, dci_client_id, dci_api_secret,
                                user_agent=user_agent, max_retries=max_retries)
 
@@ -198,5 +181,4 @@ def build_sso_context(dci_cs_url, sso_url, username, password, token,
         token = _get_token_from_server(sso_url, username, password)
         _write_token_to_file(token_path, token)
 
-    dci_cs_url = dci_cs_url or os.environ.get('DCI_CS_URL', '')
     return SsoContext(dci_cs_url, token, max_retries, user_agent)

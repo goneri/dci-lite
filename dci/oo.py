@@ -358,8 +358,28 @@ class DCIResourceCollection:
 
 
 class Engine:
-    def __init__(self, **kwargs):
-        self._c = dci.client.DCIClient(**kwargs)
+    def __init__(self, dci_cs_url=None, dci_login=None, dci_password=None,
+                 dci_client_id=None, dci_api_secret=None, **kwargs):
+        dci_cs_url = dci_cs_url or os.environ.get('DCI_CS_URL')
+        dci_login = dci_login or os.environ.get('DCI_LOGIN')
+        dci_password = dci_password or os.environ.get('DCI_PASSWORD')
+        dci_client_id = dci_client_id or os.environ.get('DCI_CLIENT_ID')
+        dci_api_secret = dci_api_secret or os.environ.get('DCI_API_SECRET')
+
+        if dci_login:
+            self._c = dci.client.DCIClient(
+                dci_cs_url=dci_cs_url,
+                dci_login=dci_login,
+                dci_password=dci_password,
+                **kwargs)
+        elif dci_client_id:
+            self._c = dci.client.DCIClient(
+                dci_cs_url=dci_cs_url,
+                dci_client_id=dci_client_id,
+                dci_api_secret=dci_api_secret,
+                **kwargs)
+        else:
+            raise Exception('dci_login or dci_client_id should be set.')
 
     def __getattr__(self, resource):
         def return_collection():
