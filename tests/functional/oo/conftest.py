@@ -13,7 +13,9 @@ def c():
         max_retries=1)
     try:
         if c.teams.len() > 1 or c.users.len() > 1:
-            pytest.skip("DB is not empty")
+            pytest.skip(
+                    "dci-dev-env DB is not empty. "
+                    "Bailing out to avoid data lose.")
     except requests.exceptions.ConnectionError:
         pytest.skip("DCI dev env not available")
 
